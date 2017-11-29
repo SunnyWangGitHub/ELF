@@ -56,6 +56,8 @@ class PolicyGradient:
             ``policy_err``: polict error
             ``entropy_err``: entropy error
         '''
+        a = a.long()
+
         batchsize = a.size(0)
 
         # Add normalization constant
@@ -134,7 +136,7 @@ class PolicyGradient:
 
         for pi_node, a_node in self.policy_action_nodes:
             pi = pi_s[pi_node]
-            a = actions[a_node].squeeze()
+            a = actions[a_node].squeeze().long()
 
             if pi_node in old_pi_s:
                 old_pi = old_pi_s[pi_node].squeeze()
