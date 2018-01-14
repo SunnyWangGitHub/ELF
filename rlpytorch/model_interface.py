@@ -94,6 +94,7 @@ class ModelInterface:
 
         # New model.
         self.models[key] = model.clone() if copy else model
+        self.models[key].use_cuda = cuda
         if cuda:
             if gpu_id is not None:
                 self.models[key].cuda(device=gpu_id)

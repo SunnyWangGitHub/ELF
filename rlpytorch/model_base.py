@@ -25,6 +25,7 @@ class Model(nn.Module):
         self.step = 0
         self.args = deepcopy(args)
         self.volatile = False
+        self.use_cuda = False
 
     def clone(self, gpu=None):
         '''Deep copy an existing model. ``args``, ``step`` and ``state_dict`` are copied.
@@ -55,6 +56,8 @@ class Model(nn.Module):
         Returns:
             Variable for x
         '''
+        if (self.use_cuda):
+            x = x.cuda()
         if not isinstance(x, Variable):
             return Variable(x, volatile=self.volatile)
         else:
