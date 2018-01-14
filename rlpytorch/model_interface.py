@@ -114,6 +114,9 @@ class ModelInterface:
             if params["opt_method"] == "adam":
                 self.optimizers[key] = \
                         torch.optim.Adam(curr_model.parameters(), lr = params["lr"], betas = (0.9, 0.999), eps=params["adam_eps"])
+            elif params["opt_method"] == "sgd":
+                self.optimizers[key] = \
+                        torch.optim.SGD(curr_model.parameters(), lr = params["lr"])
             else:
                 raise ValueError("Optimization method %s is not supported! " % params["opt_method"])
 
