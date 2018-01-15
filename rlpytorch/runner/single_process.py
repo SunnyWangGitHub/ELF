@@ -1,4 +1,5 @@
 from ..args_provider import ArgsProvider
+import sys
 import tqdm
 
 class SingleProcessRun:
@@ -47,12 +48,16 @@ class SingleProcessRun:
             else: iterator = range(args.num_minibatch)
 
             for i in iterator:
+                if (i%100 == 0):
+                    print("iteration %d, episode %d" % (i,k))
+                sys.stdout.flush()
                 self.GC.Run()
 
             if self.episode_summary is not None:
                 self.episode_summary(k)
 
         self.GC.PrintSummary()
+        sys.stdout.flush()
         self.GC.Stop()
 
     def run_multithread(self):
