@@ -36,6 +36,7 @@ struct ContextOptions {
     bool wait_per_group = false;
 
     int num_collectors = 1;
+    int seed = 42;
 
     mcts::TSOptions mcts_options;
 
@@ -52,7 +53,7 @@ struct ContextOptions {
       std::cout << mcts_options.info() << std::endl;
     }
 
-    REGISTER_PYBIND_FIELDS(num_games, max_num_threads, T, verbose_comm, verbose_collector, wait_per_group, mcts_options, num_collectors);
+    REGISTER_PYBIND_FIELDS(num_games, max_num_threads, T, verbose_comm, verbose_collector, wait_per_group, mcts_options, num_collectors, seed);
 };
 
 inline constexpr int get_query_id(int game_id, int thread_id) {
