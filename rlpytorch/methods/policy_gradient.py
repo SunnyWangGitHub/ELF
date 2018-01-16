@@ -138,8 +138,12 @@ class PolicyGradient:
             pi = pi_s[pi_node]
             a = actions[a_node].squeeze().long()
 
+            isCuda = pi.is_cuda
+            cudaify = lambda x: x.cuda() if isCuda else x
+            a = cudaify(a)
+
             if pi_node in old_pi_s:
-                old_pi = old_pi_s[pi_node].squeeze()
+                old_pi = cudaify(old_pi_s[pi_node].squeeze())
 
                 # Cap it.
                 coeff = torch.clamp(pi.data.div(old_pi), max=args.ratio_clamp).gather(1, a.view(-1, 1)).squeeze()

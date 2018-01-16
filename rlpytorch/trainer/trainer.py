@@ -14,6 +14,7 @@ from ..stats import Stats
 from .timer import RLTimer
 from .utils import ModelSaver, MultiCounter
 from datetime import datetime
+import torch
 
 # import torch.multiprocessing as _mp
 # mp = _mp.get_context('spawn')
@@ -70,9 +71,8 @@ class Evaluator:
 
         # actor model.
         m = self.mi[self.actor_name]
-        m.set_volatile(True)
-        state_curr = m.forward(batch.hist(0))
-        m.set_volatile(False)
+        with torch.no_grad():
+            state_curr = m.forward(batch.hist(0))
 
         if self.sampler is not None:
             reply_msg = self.sampler.sample(state_curr)

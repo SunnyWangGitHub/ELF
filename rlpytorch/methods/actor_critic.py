@@ -54,9 +54,12 @@ class ActorCritic:
         T = batch["s"].size(0)
 
         state_curr = m(batch.hist(T - 1))
+        isCuda = state_curr[value_node].is_cuda
+        cudaify = lambda x: x.cuda() if isCuda else x
+
         self.discounted_reward.setR(state_curr[value_node].squeeze().data, stats)
 
-        err = None
+        tot_err = None
 
         for t in range(T - 2, -1, -1):
             bht = batch.hist(t)
@@ -66,12 +69,16 @@ class ActorCritic:
             V = state_curr[value_node].squeeze()
 
             R = self.discounted_reward.feed(
-                dict(r=batch["r"][t], terminal=batch["terminal"][t]),
+                dict(r=cudaify(batch["r"][t]), terminal=batch["terminal"][t]),
                 stats=stats)
 
+            err = None
             policy_err = self.pg.feed(R-V.data, state_curr, bht, stats, old_pi_s=bht)
             err = add_err(err, policy_err)
             err = add_err(err, self.value_matcher.feed({ value_node: V, "target" : R}, stats))
+            err.backward()
+            if tot_err is None:
+                tot_err = torch.zeros_like(err.data)
+            tot_err += err.data
 
-        stats["cost"].feed(err.data[0] / (T - 1))
-        err.backward()
+        stats["cost"].feed(tot_err[0] / (T - 1))

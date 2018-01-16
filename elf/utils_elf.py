@@ -227,7 +227,7 @@ class GCWrapper:
 
         self._init_collectors(GC, co, descriptions, use_gpu=gpu is not None, use_numpy=use_numpy)
         self.gpu = gpu
-        self.inputs_gpu = [ self.inputs[gids[0]].cpu2gpu(gpu=gpu) for gids in self.gpu2gid ] if gpu is not None else None
+        self.inputs_gpu = None#[ self.inputs[gids[0]].cpu2gpu(gpu=gpu) for gids in self.gpu2gid ] if gpu is not None else None
         self.params = params
         self._cb = { }
 

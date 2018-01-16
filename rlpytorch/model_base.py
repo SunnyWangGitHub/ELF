@@ -50,6 +50,13 @@ class Model(nn.Module):
             volatile(bool): indicating that the Variable should be used in inference mode, i.e. don't save the history.'''
         self.volatile = volatile
 
+    def _cuda(self, x):
+        ''' Cudaify if necessary'''
+        if (self.use_cuda):
+            x = x.cuda()
+        return x
+
+
     def _var(self, x):
         ''' Convert tensor x to a pytorch Variable.
 
@@ -59,7 +66,7 @@ class Model(nn.Module):
         if (self.use_cuda):
             x = x.cuda()
         if not isinstance(x, Variable):
-            return Variable(x, volatile=self.volatile)
+            return Variable(x)
         else:
             return x
 
