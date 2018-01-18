@@ -56,7 +56,7 @@ class PolicyGradient:
             ``policy_err``: polict error
             ``entropy_err``: entropy error
         '''
-        a = a.long()
+        a = a.long().squeeze()
 
         batchsize = a.size(0)
 
@@ -128,22 +128,26 @@ class PolicyGradient:
         # We need to set it beforehand.
         # Note that the samples we collect might be off-policy, so we need
         # to do importance sampling.
-        pg_weights = Q.clone()
+        pg_weights = None
 
         policy_err = None
         entropy_err = None
         log_pi_s = []
 
         for pi_node, a_node in self.policy_action_nodes:
-            pi = pi_s[pi_node]
-            a = actions[a_node].squeeze().long()
+            a = actions[a_node].view(-1,1).long()
+            pi = pi_s[pi_node].view(a.size()[0],-1)
+
+            if pg_weights is None:
+                actionsPerBatch = pi.size()[0] // batchsize
+                pg_weights = Q.clone().view(batchsize,1).expand(batchsize, actionsPerBatch).contiguous().view(-1)
 
             isCuda = pi.is_cuda
             cudaify = lambda x: x.cuda() if isCuda else x
             a = cudaify(a)
 
             if pi_node in old_pi_s:
-                old_pi = cudaify(old_pi_s[pi_node].squeeze())
+                old_pi = cudaify(old_pi_s[pi_node].squeeze().view(a.size()[0],-1))
 
                 # Cap it.
                 coeff = torch.clamp(pi.data.div(old_pi), max=args.ratio_clamp).gather(1, a.view(-1, 1)).squeeze()
