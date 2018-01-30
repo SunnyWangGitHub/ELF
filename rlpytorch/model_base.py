@@ -12,6 +12,8 @@ from torch.autograd import Variable
 from time import sleep
 from collections import OrderedDict
 
+torch.backends.cudnn.benchmark = True
+
 class Model(nn.Module):
     ''' Base class for an RL model, it is a wrapper for ``nn.Module``'''
 
