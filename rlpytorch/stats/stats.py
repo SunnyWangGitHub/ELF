@@ -1,4 +1,6 @@
 from ..args_provider import ArgsProvider
+from visdom import Visdom
+
 
 class EvalCount:
     ''' Eval Count. Run games and record required stats.'''
@@ -80,6 +82,10 @@ class RewardCount(EvalCount):
     def __init__(self):
         super(RewardCount, self).__init__()
         self.reset()
+        self.viz = Visdom(server="http://100.97.67.11")
+        self.win = None
+        self.count = 0
+
 
     def reset(self):
         self.n = 0
@@ -94,6 +100,10 @@ class RewardCount(EvalCount):
 
     def _summary(self):
         str_reward = "[%d] Reward: %.2f/%d" % (self.summary_count, float(self.sum_reward) / (self.n + 1e-10), self.n)
+        if self.win is None:
+            win=self.viz.line(X=np.array([self.count]), Y=np.array([float(self.sum_reward) / (self.n + 1e-10)]),opts=dict(xlabel="epoch", ylabel="reward"),env="rl")
+        else:
+            self.viz.line(X=np.array([self.count]), Y=np.array([float(self.sum_reward) / (self.n + 1e-10)]),win=self.win, update='append',env="rl")
         return dict(str_reward=str_reward)
 
 
