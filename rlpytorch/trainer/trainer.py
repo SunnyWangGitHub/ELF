@@ -71,8 +71,9 @@ class Evaluator:
 
         # actor model.
         m = self.mi[self.actor_name]
-        with torch.no_grad():
-            state_curr = m.forward(batch.hist(0))
+        m.set_volatile(True)
+        state_curr = m.forward(batch.hist(0))
+        m.set_volatile(False)
 
         if self.sampler is not None:
             reply_msg = self.sampler.sample(state_curr)
