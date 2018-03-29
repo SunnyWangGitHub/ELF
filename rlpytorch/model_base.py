@@ -68,7 +68,7 @@ class Model(nn.Module):
         if (self.use_cuda):
             x = x.cuda()
         if not isinstance(x, Variable):
-            return Variable(x, volatile=self.volatile)
+            return Variable(x)
         else:
             return x
 
