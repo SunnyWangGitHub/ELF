@@ -20,6 +20,8 @@
 #include <random>
 #include <map>
 #include <algorithm>
+#include <cstdlib>
+
 
 #include "pybind_helper.h"
 #include "python_options_utils_cpp.h"
@@ -395,6 +397,7 @@ public:
 
         // First set all batchsize to be 1.
         std::cout << "Prepare to stop ..." << std::endl;
+        exit(1);
         _comm.PrepareStop();
 
         // Then stop all game threads.

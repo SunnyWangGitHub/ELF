@@ -1,6 +1,6 @@
 from ..args_provider import ArgsProvider
 from visdom import Visdom
-
+import numpy as np
 
 class EvalCount:
     ''' Eval Count. Run games and record required stats.'''
@@ -74,7 +74,7 @@ class EvalCount:
 
         for batch_idx, (id, last_terminal) in enumerate(zip(ids, last_terminals)):
             self.feed(id, last_r[batch_idx])
-            if last_terminal:
+            if last_terminal == 1:
                 self.terminal(id)
 
 class RewardCount(EvalCount):
@@ -85,7 +85,8 @@ class RewardCount(EvalCount):
         self.viz = Visdom(server="http://100.97.67.11")
         self.win = None
         self.count = 0
-
+        self.data = []
+        self.indices = []
 
     def reset(self):
         self.n = 0
@@ -100,10 +101,13 @@ class RewardCount(EvalCount):
 
     def _summary(self):
         str_reward = "[%d] Reward: %.2f/%d" % (self.summary_count, float(self.sum_reward) / (self.n + 1e-10), self.n)
-        if self.win is None:
-            win=self.viz.line(X=np.array([self.count]), Y=np.array([float(self.sum_reward) / (self.n + 1e-10)]),opts=dict(xlabel="epoch", ylabel="reward"),env="rl")
-        else:
-            self.viz.line(X=np.array([self.count]), Y=np.array([float(self.sum_reward) / (self.n + 1e-10)]),win=self.win, update='append',env="rl")
+        val = float(self.sum_reward) / (self.n + 1e-10)
+        if self.n > 0:
+          print("posting", val)
+          #self.data.append(val)
+          #self.indices.append(self.count)
+          #self.win=self.viz.line(X=np.array(self.indices), Y=np.array(self.data),opts=dict(xlabel="epoch", ylabel="reward",title="rl"+str(self.count)),name="rew",env="rl")
+        self.count += 1
         return dict(str_reward=str_reward)
 
 
