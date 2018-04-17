@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
     evaluator.episode_start(0)
     model.eval = True
-    model.training(False)
+    model.train(False)
     for n in eval_iters.iters():
         GC.Run()
     GC.Stop()
