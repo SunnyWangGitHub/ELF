@@ -32,7 +32,8 @@ class ValueMatcher:
 
     def _init(self, _):
         ''' Initialize value loss to be ``nn.SmoothL1Loss``. '''
-        self.value_loss = nn.SmoothL1Loss().cuda()
+        #self.value_loss = nn.SmoothL1Loss().cuda()
+        self.value_loss = nn.MSELoss().cuda()
         self.value_node = self.args.value_node
 
     def _reg_backward(self, v):
