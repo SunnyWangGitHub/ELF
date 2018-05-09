@@ -15,6 +15,7 @@ from .timer import RLTimer
 from .utils import ModelSaver, MultiCounter
 from datetime import datetime
 import torch
+from inspect import signature
 
 # import torch.multiprocessing as _mp
 # mp = _mp.get_context('spawn')
@@ -129,6 +130,9 @@ class Trainer:
         self.evaluator = Evaluator("trainer", verbose=verbose, actor_name=actor_name)
         self.saver = ModelSaver()
         self.counter = MultiCounter(verbose=verbose)
+        self.cur_batch = 0
+        self.train_count = 0
+        self.episode_length = 30
 
         self.args = ArgsProvider(
             call_from = self,
@@ -165,9 +169,13 @@ class Trainer:
 
         self.counter.inc("train")
         self.timer.Record("batch_train")
+        self.train_count += 1
 
         mi.zero_grad()
-        self.rl_method.update(mi, batch, self.counter.stats)
+        if self.few_args:
+            self.rl_method.update(mi, batch, self.counter.stats)
+        else:
+            self.rl_method.update(mi, batch, self.counter.stats, self.cur_batch, self.episode_length)
         mi.update_weights()
 
         self.timer.Record("compute_train")
@@ -195,6 +203,7 @@ class Trainer:
             i(int): index in the minibatch
         '''
         args = self.args
+        self.cur_batch+=1
 
         prefix = "[%s][%d] Iter" % (str(datetime.now()), args.batchsize) + "[%d]: " % i
         print(prefix)
@@ -205,6 +214,10 @@ class Trainer:
         self.counter.summary(global_counter=i)
         print("")
 
+        self.episode_length = abs(self.evaluator.stats.collector.sum_reward) /(self.evaluator.stats.collector.n + 1e-10)
+
+        if self.episode_length < 1:
+            self.episode_length = 1
         self.evaluator.episode_summary(i)
         self.timer.Restart()
 
@@ -217,4 +230,8 @@ class Trainer:
             sample(`Sampler`)
         '''
         self.rl_method = rl_method
+        params = signature(self.rl_method.update)
+        self.few_args = False
+        if len(params.parameters) == 3:
+            self.few_args = True
         self.evaluator.setup(mi=mi, sampler=sampler)
