@@ -78,5 +78,6 @@ class Q_learning:
             Q_sel = Q.gather(1, a.view(-1, 1)).squeeze()
             err = add_err(err, nn.L2Loss(Q_sel, Variable(R)))
 
-        stats["cost"].feed(err.data[0] / (T - 1))
+        # stats["cost"].feed(err.data[0] / (T - 1))
+        stats["cost"].feed(err.item() / (T - 1))
         err.backward()

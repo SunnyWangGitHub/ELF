@@ -81,4 +81,5 @@ class ActorCritic:
                 tot_err = torch.zeros_like(err.data)
             tot_err += err.data
 
-        stats["cost"].feed(tot_err[0] / (T - 1))
+        # stats["cost"].feed(tot_err[0] / (T - 1))
+        stats["cost"].feed(tot_err.item() / (T - 1))
